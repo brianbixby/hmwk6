@@ -1,49 +1,49 @@
 "use strict";
 
 var searchFormEl = document.querySelector("#searchForm");
-console.log("success");
 
+function renderForecast(forecast) {
 
+}
 
-function weatherFetchRequest(city) {
-    let url = `https://api.openweathermap.org/data/2.5/forecast?q=${city},us&appid=1b9775196b0ee2a34b1770325a87f87a`;
-    fetch(url)
+function storeForecast(forecast) {
+    localStorage.setItem(`forecast-${forecast.city}`, JSON.stringify(forecast));
+}
+
+function forecastFetch(city) {
+    var data = { city: null, date: null, forecast: [] };
+    let forecastURL = `https://api.openweathermap.org/data/2.5/forecast?q=${city},us&appid=1b9775196b0ee2a34b1770325a87f87a`;
+    fetch(forecastURL)
+        .then(res => res.ok ? res.json() : Promise.reject(res))
         .then(res => {
-            if (res.status == 404) {
-
-            } else {
-                return res.json();
-            }
-        })
-        .then(res => {
-            let response = [];
-            console.log("res: ", res);
-            console.log(res.list[0]);
             for (let i = 0; i <= 39; i += 8) {
                 if (i === 0) {
-                    response.push([res.list[i].dt_txt, res.city.name, res.list[i].weather[0].icon, res.list[i].main.temp, res.list[i].wind.speed, res.list[i].main.humidity]);
+                    data.city = res.city.name;
+                    data.date = res.list[i].dt_txt;
+                    data.forecast.push([res.list[i].dt_txt, res.city.name, res.list[i].weather[0].icon, res.list[i].main.temp, res.list[i].wind.speed, res.list[i].main.humidity]);
                 } else {
-                    response.push([res.list[i].dt_txt, res.list[i].weather[0].icon, res.list[i].main.temp, res.list[i].wind.speed, res.list[i].main.humidity]);
+                    data.forecast.push([res.list[i].dt_txt, res.list[i].weather[0].icon, res.list[i].main.temp, res.list[i].wind.speed, res.list[i].main.humidity]);
                     if (i == 32) i--;
                 }
             }
-            localStorage.weatherAppToken = JSON.stringify(response);
-            localStorage.weatherAppCity = city;
-            localStorage.timestamp = new Date().getTime() + 480000;
-
             let uviURL = `https://api.openweathermap.org/data/2.5/onecall?lat=${res.city.coord.lat}&lon=${res.city.coord.lat}&exclude=current,minutely,hourly,alerts&appid=1b9775196b0ee2a34b1770325a87f87a`;
-            fetch(uviURL)
-                .then(res => res.json())
-                .then(data => {
-                    console.log("data: ", data);
-                    response[0].push(data.daily[0].uvi);
-                    console.log("response ", response)
-                })
+            return fetch(uviURL);
+        })
+        .then(res => res.ok ? res.json() : Promise.reject(res))
+        .then(res => {
+            data.forecast[0].push(res.daily[0].uvi);
+            storeForecast(data);
+            renderForecast(data);
         })
         .catch(err => {
-            if (err.status === 404)
-                return alert('404 Error: City not found please try again with a vaid city name. Ex. Seattle');
-            alert(`${err.status} Error: ${err.message}`);
+            console.log("err: ", err);
+            // if (err.status === 404)
+            //     return alert('404 Error: City not found please try again with a vaid city name. Ex. Seattle');
+            // alert(`${err.status} Error: ${err.message}`);
+            // if (res.status == 404) {
+            // } else {
+            //     return res.json();
+            // }
         });
 }
 
@@ -52,9 +52,27 @@ function weatherFetchRequest(city) {
 
 function handleSubmit(event) {
     event.preventDefault();
-    var city = document.querySelector("#searchInput").value;
-    console.log("city ", city);
-    weatherFetchRequest(city);
+
+    var city = document.querySelector("#searchInput").value.trim();
+    if (!city) {
+        // to do display error message
+    } else {
+        var storedForecast = JSON.parse(localStorage.getItem(`forecast-${city}`));
+        if (storedForecast) {
+            if (moment(storedForecast.date).isSame(new Date(), 'day')) {
+                console.log("handleSubmit if beg");
+                storeForecast(storedForecast);
+                renderForecast(storedForecast);
+                console.log("handleSubmit if end");
+                return;
+            } else {
+                localStorage.removeItem(`forecast-${city}`);
+            }
+        }
+        console.log("handleSubmit else beg");
+        forecastFetch(city);
+        console.log("handleSubmit else end");
+    }
 }
 
 searchFormEl.addEventListener("submit", handleSubmit);
