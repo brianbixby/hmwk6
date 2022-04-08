@@ -1,34 +1,50 @@
 "use strict";
 
 var searchFormEl = document.querySelector("#searchForm");
-
+var recentSearchesContainerEl = document.querySelector("#recentSearchesContainer");
+var searches = [];
 
 var convertKtoF = k => parseFloat(Number(k) * 9 / 5 - 459.67).toFixed(2);
 
 function renderForecast(data) {
-    var cityDateTodayEl = document.querySelector("#cityDateToday");
-    var iconTodayEl = document.querySelector("#iconToday");
-    var tempTodayEl = document.querySelector("#tempToday");
-    var windTodayEl = document.querySelector("#windToday");
-    var humidityTodayEl = document.querySelector("#humidityToday");
-    var uviTodayEl = document.querySelector("#uviToday");
+    var forecastEl = document.querySelector("#forecast");
+    forecastEl.innerHTML = "";
 
-    cityDateTodayEl.textContent = `${data.forecast[0][1]} ${moment(data.forecast[0][0]).format("M/D/YYYY")}`;
-    iconTodayEl.setAttribute("src", `http://openweathermap.org/img/w/${data.forecast[0][2]}.png`);
-    tempTodayEl.textContent = `Temp: ${convertKtoF(data.forecast[0][3])} °F`;
-    windTodayEl.textContent = `Wind: ${data.forecast[0][4]} MPH`;
-    humidityTodayEl.textContent = `Humidity: ${data.forecast[0][5]} %`;
-    uviTodayEl.textContent = `UV Index: ${data.forecast[0][6]}`;
+    var h3El = document.createElement("h3");
+    var imgEl = document.createElement("img");
+    var p1El = document.createElement("p");
+    var p2El = document.createElement("p");
+    var p3El = document.createElement("p");
+    var p4El = document.createElement("p");
+    var spanEl = document.createElement("span");
+
+    h3El.textContent = `${data.forecast[0][1]} ${moment(data.forecast[0][0]).format("M/D/YYYY")}`;
+    imgEl.setAttribute("src", `http://openweathermap.org/img/w/${data.forecast[0][2]}.png`);
+    imgEl.setAttribute("alt", "forecast icon");
+    p1El.textContent = `Temp: ${convertKtoF(data.forecast[0][3])} °F`;
+    p2El.textContent = `Wind: ${data.forecast[0][4]} MPH`;
+    p3El.textContent = `Humidity: ${data.forecast[0][5]} %`;
+    p4El.textContent = "UV Index: ";
+    spanEl.textContent = data.forecast[0][6];
+
+    p4El.appendChild(spanEl);
+    forecastEl.appendChild(h3El);
+    forecastEl.appendChild(imgEl);
+    forecastEl.appendChild(p1El);
+    forecastEl.appendChild(p2El);
+    forecastEl.appendChild(p3El);
+    forecastEl.appendChild(p4El);
 
     var forecast5DayEl = document.querySelector("#forecast5Day");
     forecast5DayEl.innerHTML = '';
+
     for (let i = 1; i < data.forecast.length; i++) {
         let div = document.createElement("div");
         let h6 = document.createElement("h6");
         let img = document.createElement("img");
-        let p1 = document.createElement("p1");
-        let p2 = document.createElement("p2");
-        let p3 = document.createElement("p3");
+        let p1 = document.createElement("p");
+        let p2 = document.createElement("p");
+        let p3 = document.createElement("p");
 
         div.setAttribute("class", "card");
         img.setAttribute("src", `http://openweathermap.org/img/w/${data.forecast[i][1]}.png`);
@@ -45,6 +61,52 @@ function renderForecast(data) {
         div.appendChild(p2);
         div.appendChild(p3);
         forecast5DayEl.appendChild(div);
+    }
+
+    // update searches, 
+    if (searches.length) {
+        for (let i = 0;i <searches.length;i++) {
+            if(searches[i] == data.forecast[0][1].toLowerCase()) {
+                searches.splice(i, 1);
+                searches.push(data.forecast[0][1].toLowerCase());
+                renderSearches();
+                return;
+            } else if (i == 8) {
+                searches.splice(0, 1);
+                searches.push(data.forecast[0][1].toLowerCase());
+                renderSearches();
+            } else if (i == searches.length - 1) {
+                searches.push(data.forecast[0][1].toLowerCase());
+                renderSearches();
+            }
+        }
+    } else {
+        searches.push(data.forecast[0][1].toLowerCase());
+        renderSearches();
+    }
+
+}
+
+function renderSearches() {
+    recentSearchesContainerEl.innerHTML = "";
+
+    for (let i=0;i<searches.length;i++) {
+        let buttonEl =document.createElement("button");
+        buttonEl.setAttribute("data-city", searches[i].toLowerCase());
+        buttonEl.setAttribute("class", "recentSearchButton");
+        buttonEl.textContent = searches[i][0].toUpperCase() + searches[i].slice(1);
+        recentSearchesContainerEl.appendChild(buttonEl);
+    }
+    localStorage.setItem("searches", JSON.stringify(searches));
+}
+
+function init() {
+    var storedSearches = JSON.parse(localStorage.getItem("searches"));
+
+    if (storedSearches !== null) {
+        searches = storedSearches;
+        renderSearches();
+        searchHelper(storedSearches[storedSearches.length - 1]);
     }
 }
 
@@ -92,6 +154,19 @@ function forecastFetch(city) {
 
 // 1b9775196b0ee2a34b1770325a87f87a
 
+function searchHelper(city) {
+    var storedForecast = JSON.parse(localStorage.getItem(`forecast-${city}`));
+    if (storedForecast) {
+        if (moment(storedForecast.date).isSame(new Date(), 'day')) {
+            renderForecast(storedForecast);
+            return;
+        } else {
+            localStorage.removeItem(`forecast-${city}`);
+        }
+    }
+    forecastFetch(city);
+}
+
 function handleSubmit(event) {
     event.preventDefault();
 
@@ -99,17 +174,19 @@ function handleSubmit(event) {
     if (!city) {
         // to do display error message
     } else {
-        var storedForecast = JSON.parse(localStorage.getItem(`forecast-${city}`));
-        if (storedForecast) {
-            if (moment(storedForecast.date).isSame(new Date(), 'day')) {
-                renderForecast(storedForecast);
-                return;
-            } else {
-                localStorage.removeItem(`forecast-${city}`);
-            }
-        }
-        forecastFetch(city);
+        searchHelper(city);
     }
 }
 
 searchFormEl.addEventListener("submit", handleSubmit);
+
+recentSearchesContainerEl.addEventListener("click", function(event) {
+    var el = event.target;
+    console.log("click hit")
+    if (el.matches("button")) {
+        var city = el.getAttribute("data-city");
+        searchHelper(city);
+    }
+});
+
+init();

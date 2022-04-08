@@ -1,0 +1,23 @@
+#forecast {
+    border: 1px solid black;
+}
+
+#forecast h3 {
+    display: inline-block;
+}
+
+#forecast span {
+    background-color: #167E50;
+    color: #FFF;
+}
+
+#forecast5Day .card {
+    background-color: #33475B;
+    color: #FFF;
+}
+
+#forecast5Day img,
+#forecast img {
+    width: 50px;
+    height: 50px;
+}

@@ -19,32 +19,19 @@
 
     <main class="container-fluid">
         <div class="row">
-            <div class="col-lg-3">
+            <div id="aside" class="col-lg-3">
                 <h3>Search for a city:</h3>
                 <form id="searchForm" action="">
                     <input id="searchInput" type="text" placeholder="San Diego">
                     <button>Search</button>
                 </form>
+                <div id="recentSearchesContainer"></div>
             </div>
             <div class="col-lg-9">
                 <div id="forecast">
-                    <h3 id="cityDateToday"></h3> <img id="iconToday" src="" alt="forecast icon" />
-                    <p id="tempToday"></p>
-                    <p id="windToday"></p>
-                    <p id="humidityToday"></p>
-                    <p id="uviToday"></p>
                 </div>
 
                 <div id="forecast5Day">
-                    <h5></h5>
-                    <div class="card">
-                        <h6></h6>
-                        <img src="" alt="">
-                        <p></p>
-                        <p></p>
-                        <p></p>
-
-                    </div>
                 </div>
             </div>
         </div>
