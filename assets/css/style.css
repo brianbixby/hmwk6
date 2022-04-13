@@ -1,23 +1,138 @@
-#forecast {
-    border: 1px solid black;
+header {
+	text-align: center;
+	font-size: 40px;
+	color: #FFF;
+	background-image: linear-gradient(to right, #3C6EC4, #230755);
+	height: 70px;
+	padding-bottom: 15px;
+	padding-top: 15px;
+	font-weight: bold;
 }
 
-#forecast h3 {
-    display: inline-block;
+main {
+	padding: 15px 10px;
+	margin: 0 auto;
+}
+
+input {
+	padding: 15px 10px;
+	height: 50px;
+	border-radius: 5px;
+	width: 100%;
+	border: 1px solid gray;
+	font-size: 20px;
+	color: gray;
+	margin-bottom: 15px;
+}
+
+form {
+	padding-bottom: 15px;
+	border-bottom: 1px solid black;
+}
+
+form button {
+	width: 100%;
+	color: #FFF;
+	background-color: #5BA2E9;
+	border: 1px solid #5BA2E9;
+	border-radius: 5px;
+	font-size: 15px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.recentSearchButton {
+	background: #B7B7B7;
+	border: 1px solid #B7B7B7;
+	border-radius: 5px;
+	width: 100%;
+	font-size: 15px;
+	line-height: 1;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	height: 35px;
+	margin-top: 15px;
+}
+
+#aside h2 {
+	font-weight: bold;
+}
+
+#forecast {
+	border: 1px solid black;
+	padding: 20px 10px;
+	position: relative;
+}
+
+#forecast h2 {
+	display: inline-block;
+	font-weight: bold;
 }
 
 #forecast span {
-    background-color: #167E50;
-    color: #FFF;
+	background-color: #167E50;
+	color: #FFF;
+	padding: 5px 15px;
+	border-radius: 5px;
+}
+
+#forecast5Day {
+	display: flex;
+	justify-content: space-between;
+}
+
+#forecast5Day h4 {
+	font-weight: bold;
+	margin-top: 20px;
+	margin-bottom: 10px;
+	position: absolute;
 }
 
 #forecast5Day .card {
-    background-color: #33475B;
-    color: #FFF;
+	background-color: #33475B;
+	color: #FFF;
+	margin-top: 60px;
+	padding: 10px 5px;
+	width: calc((20% - 24px));
+	border-radius: 0 !important;
 }
 
-#forecast5Day img,
+#forecast5Day .card h5 {
+	font-weight: bold;
+}
+
+#forecast5Day .card p {
+	font-weight: 500;
+}
+
+#forecast5Day img {
+	width: 50px;
+	height: 50px;
+}
+
 #forecast img {
-    width: 50px;
-    height: 50px;
+	width: 50px;
+	height: 50px;
+	position: absolute;
+	top: 15px;
+}
+
+@media (max-width: 991px) {
+	#forecast {
+		margin-top: 15px;
+	}
+
+	main {
+		padding: 15px 25px !important;
+	}
+
+	#forecast5Day {
+		display: flex;
+		justify-content: space-between;
+		flex-wrap: wrap;
+	}
+
+	#forecast5Day .card {
+		width: 45%;
+	}
 }
